@@ -102,7 +102,7 @@ public class TransationHistoryService {
                         .createdAt(LocalDateTime.now())
                         .build();
 
-                transactionRepository.save(execute);
+//                transactionRepository.save(execute);
 
                 fromUserAccount.setBalance(fromUserAccount.getBalance() - request.getAmount());
                 fromUserAccount.setUpdatedAt(LocalDateTime.now());

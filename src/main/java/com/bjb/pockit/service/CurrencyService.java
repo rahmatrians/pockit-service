@@ -128,7 +128,7 @@ public class CurrencyService {
                 throw new Exception(errMessage);
             }
 
-            transactions = transactionRepository.findByFromUserAccountId(userAccount.getId());
+//            transactions = transactionRepository.findByFromUserAccountId(userAccount.getId());
 
             response = TransactionHistoryDto.builder()
                     .transactionHistories(transactions)

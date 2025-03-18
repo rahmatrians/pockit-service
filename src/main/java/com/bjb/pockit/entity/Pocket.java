@@ -2,7 +2,6 @@ package com.bjb.pockit.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -10,24 +9,23 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "pocket")
+@Table(name = "pcket")
 public class Pocket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "pocket_type_id", nullable = false)
-    private PocketType pocketType;
+    @Column(nullable = false)
+    private Long pocketTypeId;
 
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String accountNumber;
 
     @Column(nullable = false)
-    private BigDecimal balance = BigDecimal.ZERO;
+    private Double balance;
 
     private LocalDateTime deletedDate;
 

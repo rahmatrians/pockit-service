@@ -27,7 +27,7 @@ public class Transaction {
     private Long transactionTypeId;
 
     @Column(nullable = false)
-    private Pocket pocketId;
+    private Long pocketId;
 
     private String image;
     private String description;
