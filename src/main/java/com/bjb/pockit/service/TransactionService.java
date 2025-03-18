@@ -3,7 +3,6 @@ package com.bjb.pockit.service;
 import com.bjb.pockit.dto.*;
 import com.bjb.pockit.entity.Pocket;
 import com.bjb.pockit.entity.Transaction;
-import com.bjb.pockit.entity.UserProfile;
 import com.bjb.pockit.repository.PocketRepository;
 import com.bjb.pockit.repository.TransactionRepository;
 import com.bjb.pockit.util.DateTimeUtil;
@@ -187,6 +186,117 @@ public class TransactionService {
         }catch (Exception e) {
             response = null;
             log.error("Error : {}" + e.getMessage(), e);
+        }
+
+        return ApiResponse.<ResCreateTransactionDTO>builder()
+                .data(response)
+                .message(message)
+                .build();
+    }
+
+
+    @Transactional
+    public ApiResponse<ResCreateTransactionDTO> updateTransaction(Long id, ReqCreateTransactionDTO request) {
+        String message = "";
+        ResCreateTransactionDTO response = null;
+
+        try {
+            // Find the existing transaction
+            Optional<Transaction> transactionOpt = transactionRepository.findById(id);
+
+            if (transactionOpt.isEmpty()) {
+                return ApiResponse.<ResCreateTransactionDTO>builder()
+                        .data(null)
+                        .message("Transaction not found with ID: " + id)
+                        .build();
+            }
+
+            Transaction transaction = transactionOpt.get();
+
+            // Store previous values for rollback
+            Double prevAmount = transaction.getAmount();
+            Long prevPocketId = transaction.getPocketId();
+            Long prevTransType = transaction.getTransactionType();
+
+            // 1. First rollback the previous pocket balance
+            Optional<Pocket> prevPocketOpt = pocketRepository.findById(prevPocketId);
+
+            if (prevPocketOpt.isEmpty()) {
+                return ApiResponse.<ResCreateTransactionDTO>builder()
+                        .data(null)
+                        .message("Previous pocket not found with ID: " + prevPocketId)
+                        .build();
+            }
+
+            Pocket prevPocket = prevPocketOpt.get();
+            Double prevBalance = prevPocket.getBalance();
+
+            // Reverse the previous transaction effect on the pocket balance
+            if (prevTransType.equals(1L) || prevTransType.equals(3L) || prevTransType.equals(5L)) { // expense
+                prevBalance += prevAmount; // Add back the expense amount
+            } else if (prevTransType.equals(2L) || prevTransType.equals(4L)) { // income
+                prevBalance -= prevAmount; // Subtract the income amount
+            }
+
+            // Update the previous pocket balance
+            pocketRepository.updateBalance(prevBalance, prevPocketId);
+
+            // 2. Update the transaction data
+            transaction.setTransactionType(request.getTransactionType());
+            transaction.setPocketId(request.getPocketId());
+            transaction.setDescription(request.getDescription());
+            transaction.setTag(request.getTag());
+
+            // Parse and set the transaction date
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate transactionDate = LocalDate.parse(request.getDate(), formatter);
+            transaction.setTransDate(transactionDate);
+
+            transaction.setAmount(request.getAmount());
+            transaction.setUpdatedAt(DateTimeUtil.generateDateTimeIndonesia());
+
+            // Save the updated transaction
+            transaction = transactionRepository.saveAndFlush(transaction);
+
+            // 3. Apply the new transaction to the new/same pocket
+            Optional<Pocket> newPocketOpt = pocketRepository.findById(request.getPocketId());
+
+            if (newPocketOpt.isEmpty()) {
+                // If new pocket doesn't exist, roll back the previous pocket change and throw exception
+                pocketRepository.updateBalance(prevPocket.getBalance(), prevPocketId);
+                throw new IllegalArgumentException("New pocket not found with ID: " + request.getPocketId());
+            }
+
+            Pocket newPocket = newPocketOpt.get();
+            Double newBalance = newPocket.getBalance();
+
+            // Apply the new transaction effect to the pocket balance
+            if (request.getTransactionType().equals(1L) || request.getTransactionType().equals(3L) || request.getTransactionType().equals(5L)) {
+                newBalance -= request.getAmount(); // Subtract for expense
+            } else {
+                newBalance += request.getAmount(); // Add for income
+            }
+
+            // Update the new pocket balance
+            pocketRepository.updateBalance(newBalance, request.getPocketId());
+
+            // Build the response
+            response = ResCreateTransactionDTO.builder()
+                    .userId(request.getUserId())
+                    .pocketId(request.getPocketId())
+                    .transactionType(request.getTransactionType())
+                    .description(request.getDescription())
+                    .tag(request.getTag())
+                    .amount(request.getAmount())
+                    .date(request.getDate())
+                    .build();
+
+            message = "Transaction updated successfully";
+
+        } catch (Exception e) {
+            // Log the error and return null data
+            log.error("Error updating transaction: {}", e.getMessage(), e);
+            message = "Failed to update transaction: " + e.getMessage();
         }
 
         return ApiResponse.<ResCreateTransactionDTO>builder()

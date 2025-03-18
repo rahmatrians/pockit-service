@@ -65,4 +65,23 @@ public class TransactionController {
                     .body(ApiResponse.error(response.getMessage()));
         }
     }
+
+    @PutMapping("/transaction/update/{id}")
+    public ResponseEntity<ApiResponse<ResCreateTransactionDTO>> updateTransaction(
+            @PathVariable("id") Long id,
+            @RequestBody ReqCreateTransactionDTO request) {
+
+
+        ApiResponse<ResCreateTransactionDTO> response = transactionService.updateTransaction(id, request);
+
+        if (ObjectUtils.isNotEmpty(response.getData())) {
+            return ResponseEntity
+                    .status(ResponseStatus.OK.getStatus())
+                    .body(ApiResponse.success(response.getData(), response.getMessage()));
+        } else {
+            return ResponseEntity
+                    .status(ResponseStatus.NOT_FOUND.getStatus())
+                    .body(ApiResponse.error(response.getMessage()));
+        }
+    }
 }
