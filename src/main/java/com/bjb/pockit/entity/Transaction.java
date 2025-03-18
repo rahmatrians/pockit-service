@@ -17,22 +17,21 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_profile_id", nullable = false)
-    private UserProfile userProfile;
+    @Column(nullable = false)
+    private Long userProfileId;
 
-    @ManyToOne
-    @JoinColumn(name = "split_bill_id")
-    private SplitBill splitBill;
+    @Column(nullable = false)
+    private Long splitBillId;
 
-    private Integer transactionTypeId;
+    @Column(nullable = false)
+    private Long transactionTypeId;
 
-    @ManyToOne
-    @JoinColumn(name = "pocket_id", nullable = false)
-    private Pocket pocket;
+    @Column(nullable = false)
+    private Pocket pocketId;
 
     private String image;
     private String description;
+    private String tag;
     private LocalDate transDate;
 
     @Column(nullable = false)

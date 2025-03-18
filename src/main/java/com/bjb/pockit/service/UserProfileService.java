@@ -1,29 +1,13 @@
 package com.bjb.pockit.service;
 
-import com.bjb.pockit.constant.ResponseCode;
-import com.bjb.pockit.dto.ApiResponse;
-import com.bjb.pockit.dto.ReqRegisterDTO;
-import com.bjb.pockit.dto.ResRegisterDTO;
-import com.bjb.pockit.dtoWILLREMOVE.GetCreateUserDto;
-import com.bjb.pockit.dtoWILLREMOVE.GetUpdateUserDto;
-import com.bjb.pockit.dtoWILLREMOVE.ReqCreateUserDto;
-import com.bjb.pockit.dtoWILLREMOVE.UpdateUserRequestDto;
-import com.bjb.pockit.entity.UserAccountsWILLREMOVE;
-import com.bjb.pockit.entity.UserAuthenticationsWILLREMOVE;
+import com.bjb.pockit.dto.*;
 import com.bjb.pockit.entity.UserProfile;
-import com.bjb.pockit.repository.AccountRepository;
 import com.bjb.pockit.repository.UserProfileRepository;
-import com.bjb.pockit.repository.UserAuthenticationRepository;
 import com.bjb.pockit.util.DateTimeUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 @Slf4j
@@ -37,15 +21,15 @@ public class UserProfileService {
 
     @Transactional
     public ApiResponse<ResRegisterDTO> registerUser(ReqRegisterDTO request) {
-        String errMessage = "";
+        String message = "";
         ResRegisterDTO response = new ResRegisterDTO();
 
         try {
             Optional<UserProfile> isUserExist = userProfileRepository.findByEmail(request.getEmail());
 
             if (isUserExist.isPresent()) {
-                errMessage = "Email already registered, please use other email";
-                throw  new Exception(errMessage);
+                message = "Email already registered, please use other email";
+                throw  new Exception(message);
             }
 
             UserProfile userProfile = UserProfile.builder()
@@ -59,13 +43,14 @@ public class UserProfileService {
             userProfile = userProfileRepository.saveAndFlush(userProfile);
 
             response = ResRegisterDTO.builder()
+                    .id(userProfile.getId())
                     .fullname(userProfile.getFullname())
                     .gender(userProfile.getGender())
                     .email(userProfile.getEmail())
                     .phoneNumber(userProfile.getPhoneNumber())
                     .build();
 
-            errMessage = "User Successfully registered";
+            message = "User registered successfully";
 
         }catch (Exception e) {
             response = null;
@@ -74,7 +59,41 @@ public class UserProfileService {
 
         return ApiResponse.<ResRegisterDTO>builder()
                 .data(response)
-                .message(errMessage)
+                .message(message)
+                .build();
+    }
+
+
+    @Transactional
+    public ApiResponse<ResLoginDTO> loginUser(ReqLoginDTO request) {
+        String message = "";
+        ResLoginDTO response = new ResLoginDTO();
+
+        try {
+            Optional<UserProfile> isUserExist = userProfileRepository.findByEmailAndPassword(request.getEmail(), request.getPassword());
+
+            if (!isUserExist.isPresent()) {
+                message = "Email or password is wrong, please try again";
+                throw  new Exception(message);
+            }
+
+            response = ResLoginDTO.builder()
+                    .fullname(isUserExist.get().getFullname())
+                    .gender(isUserExist.get().getGender())
+                    .email(isUserExist.get().getEmail())
+                    .phoneNumber(isUserExist.get().getPhoneNumber())
+                    .build();
+
+            message = "User logged in successfully";
+
+        }catch (Exception e) {
+            response = null;
+            log.error("Error : {}" + e.getMessage(), e);
+        }
+
+        return ApiResponse.<ResLoginDTO>builder()
+                .data(response)
+                .message(message)
                 .build();
     }
 

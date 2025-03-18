@@ -16,9 +16,14 @@ public class SplitBill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_profile_id", nullable = false)
-    private UserProfile userProfile;
+    @Column(nullable = false)
+    private Long userProfileId;
+
+    @Column(nullable = false)
+    private Long creatorSpentPocketId;
+
+    @Column(nullable = false)
+    private Long creatorDestPocketId;
 
     @Column(nullable = false)
     private String title;

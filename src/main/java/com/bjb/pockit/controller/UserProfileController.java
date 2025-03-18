@@ -36,7 +36,17 @@ public class UserProfileController {
 
     @PostMapping("/auth/login")
     public ResponseEntity<ApiResponse<ResLoginDTO>> login(@RequestBody ReqLoginDTO request) {
-        ResLoginDTO test = ResLoginDTO.builder().build();
-        return ResponseEntity.ok(ApiResponse.error("User found"));
+
+        ApiResponse<ResLoginDTO> response = userProfileService.loginUser(request);
+
+        if (ObjectUtils.isNotEmpty(response.getData())) {
+            return ResponseEntity
+                    .status(ResponseStatus.OK.getStatus())
+                    .body(ApiResponse.success(response.getData(), response.getMessage()));
+        } else {
+            return ResponseEntity
+                    .status(ResponseStatus.NOT_FOUND.getStatus())
+                    .body(ApiResponse.error(response.getMessage()));
+        }
     }
 }

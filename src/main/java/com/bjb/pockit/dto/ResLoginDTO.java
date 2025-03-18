@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ResLoginDTO {
 
+    private Long id;
     private String fullname;
     private String gender;
     private String phoneNumber;
