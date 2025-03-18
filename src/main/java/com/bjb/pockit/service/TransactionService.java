@@ -9,6 +9,9 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -65,6 +68,49 @@ public class TransactionService {
         }
 
         return ApiResponse.<ResSummaryBalanceDTO>builder()
+                .data(response)
+                .message(message)
+                .build();
+    }
+
+
+    @Transactional
+    public ApiResponse<ResTransactionDailyDTO> getTransactionDaily(Long userId, String date, Long page, Long size) {
+        String message = "";
+        ResTransactionDailyDTO response = new ResTransactionDailyDTO();
+
+        try {
+            LocalDate splitDate = LocalDate.parse(date);
+            Long year = Long.valueOf(splitDate.getYear());
+            Long month = Long.valueOf(splitDate.getMonthValue());
+
+            int defaultPage = Math.toIntExact((page != null) ? page : 0);
+            int defaultSize = Math.toIntExact((size != null) ? size : 10);
+            Pageable pageable = PageRequest.of(defaultPage, defaultSize);
+
+            Page<TransactionDaily> dailyTransactions = transactionRepository.findTransactionDailyByUserId(userId, month, year, pageable);
+
+            if (ObjectUtils.isEmpty(dailyTransactions)) {
+                message = "Failed to get total daily transactions";
+                throw  new Exception(message);
+            }
+
+
+            response = ResTransactionDailyDTO.builder()
+                    .userId(userId)
+                    .size(Long.valueOf(dailyTransactions.getSize()))
+                    .page(Long.valueOf(dailyTransactions.getTotalPages()))
+                    .transactions(dailyTransactions.getContent())
+                    .build();
+
+            message = "daily transactions get successfully";
+
+        }catch (Exception e) {
+            response = null;
+            log.error("Error : {}" + e.getMessage(), e);
+        }
+
+        return ApiResponse.<ResTransactionDailyDTO>builder()
                 .data(response)
                 .message(message)
                 .build();

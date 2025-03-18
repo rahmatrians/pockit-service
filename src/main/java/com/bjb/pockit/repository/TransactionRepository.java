@@ -1,6 +1,7 @@
 package com.bjb.pockit.repository;
 
 import com.bjb.pockit.dto.TotalSummaryBalance;
+import com.bjb.pockit.dto.TransactionDaily;
 import com.bjb.pockit.entity.Transaction;
 import com.bjb.pockit.entity.TransactionHistoriesWILLREMOVE;
 import org.springframework.data.domain.Page;
@@ -29,5 +30,27 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             @Param("userProfileId") Long userProfileId,
             @Param("month") Long month,
             @Param("year") Long year
+    );
+
+
+    @Query(value = "SELECT " +
+            " trx.id, " +
+            " trx.description, " +
+            " trx.tag, " +
+            " trx.amount, " +
+            " trx.trans_date AS transactionDate, " +
+            " trx.transaction_type AS transactionType, " +
+            " pkt.name AS pocket " +
+            " FROM transaction trx " +
+            " JOIN pocket pkt ON trx.pocket_id = pkt.id" +
+            " WHERE trx.deleted_date IS NULL AND trx.user_profile_id = :userProfileId " +
+            " AND EXTRACT(MONTH FROM trx.created_at) = :month " +
+            " AND EXTRACT(YEAR FROM trx.created_at) = :year "
+            , nativeQuery = true)
+    Page<TransactionDaily> findTransactionDailyByUserId(
+            @Param("userProfileId") Long userProfileId,
+            @Param("month") Long month,
+            @Param("year") Long year,
+            Pageable pageable
     );
 }

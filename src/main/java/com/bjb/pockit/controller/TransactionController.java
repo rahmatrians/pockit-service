@@ -33,4 +33,20 @@ public class TransactionController {
                     .body(ApiResponse.error(response.getMessage()));
         }
     }
+
+    @GetMapping("/transaction")
+    public ResponseEntity<ApiResponse<ResTransactionDailyDTO>> getTransactionDaily(@RequestParam("userId") Long userId, @RequestParam("date") String date, @RequestParam("page") Long page,  @RequestParam("size") Long size) {
+
+        ApiResponse<ResTransactionDailyDTO> response = transactionService.getTransactionDaily(userId, date, page, size);
+
+        if (ObjectUtils.isNotEmpty(response.getData())) {
+            return ResponseEntity
+                    .status(ResponseStatus.OK.getStatus())
+                    .body(ApiResponse.success(response.getData(), response.getMessage()));
+        } else {
+            return ResponseEntity
+                    .status(ResponseStatus.NOT_FOUND.getStatus())
+                    .body(ApiResponse.error(response.getMessage()));
+        }
+    }
 }
