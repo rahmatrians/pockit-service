@@ -9,11 +9,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "pcket")
+@Table(name = "pocket")
 public class Pocket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private Long userProfileId;
 
     @Column(nullable = false)
     private Long pocketTypeId;

@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 public interface PocketRepository extends JpaRepository<Pocket, Long> {
 
     @Query(value = "SELECT " +
+            " SUM(balance) AS totalIncome, " +
+            " SUM(balance) AS totalExpense, " +
             " SUM(balance) AS totalBalance " +
             " FROM pocket " +
             " WHERE deleted_date IS NULL AND user_profile_id = :userProfileId "
