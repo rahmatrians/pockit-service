@@ -1,21 +1,13 @@
 package com.bjb.pockit.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TransactionDaily {
+public interface TransactionDaily {
 
-    private Long id;
-    private String description;
-    private String tag;
-    private Double amount;
-    private String transactionDate;
-    private String pocket;
-    private String transactionType;
+    Long getId();
+    String getDescription();
+    String getTag();
+    Double getAmount();
+    String getTransactionDate();
+    String getPocket();
+    String getTransactionType();
 }

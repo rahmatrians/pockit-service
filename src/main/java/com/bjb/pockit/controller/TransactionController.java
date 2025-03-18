@@ -49,4 +49,20 @@ public class TransactionController {
                     .body(ApiResponse.error(response.getMessage()));
         }
     }
+
+    @PostMapping("/transaction/create")
+    public ResponseEntity<ApiResponse<ResCreateTransactionDTO>> createTransaction(@RequestBody ReqCreateTransactionDTO request) {
+
+        ApiResponse<ResCreateTransactionDTO> response = transactionService.createTransaction(request);
+
+        if (ObjectUtils.isNotEmpty(response.getData())) {
+            return ResponseEntity
+                    .status(ResponseStatus.OK.getStatus())
+                    .body(ApiResponse.success(response.getData(), response.getMessage()));
+        } else {
+            return ResponseEntity
+                    .status(ResponseStatus.NOT_FOUND.getStatus())
+                    .body(ApiResponse.error(response.getMessage()));
+        }
+    }
 }

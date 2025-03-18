@@ -20,11 +20,10 @@ public class Transaction {
     @Column(nullable = false)
     private Long userProfileId;
 
-    @Column(nullable = false)
     private Long splitBillId;
 
     @Column(nullable = false)
-    private Long transactionTypeId;
+    private Long transactionType;
 
     @Column(nullable = false)
     private Long pocketId;
@@ -35,7 +34,7 @@ public class Transaction {
     private LocalDate transDate;
 
     @Column(nullable = false)
-    private BigDecimal amount = BigDecimal.ZERO;
+    private Double amount;
 
     @Column(nullable = false)
     private Integer status;

@@ -5,16 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ResTransactionDailyDTO {
+public class ReqCreateTransactionDTO {
 
     private Long userId;
-    private Long page;
-    private Long size;
-    private List<TransactionDailyDTO> transactions;
+    private String date;
+    private Long transactionType;
+    private Double amount;
+    private String tag;
+    private Long pocketId;
+    private String description;
 }

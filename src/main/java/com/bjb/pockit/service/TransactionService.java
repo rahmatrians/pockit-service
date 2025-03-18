@@ -1,10 +1,12 @@
 package com.bjb.pockit.service;
 
 import com.bjb.pockit.dto.*;
+import com.bjb.pockit.entity.Transaction;
 import com.bjb.pockit.entity.UserProfile;
 import com.bjb.pockit.repository.PocketRepository;
 import com.bjb.pockit.repository.TransactionRepository;
 import com.bjb.pockit.util.DateTimeUtil;
+import com.bjb.pockit.util.StringUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -15,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -96,11 +100,25 @@ public class TransactionService {
             }
 
 
+
+            List<TransactionDailyDTO> transactionList = dailyTransactions.getContent()
+                    .stream()
+                    .map(transaction -> TransactionDailyDTO.builder()
+                            .id(transaction.getId())
+                            .transactionDate(transaction.getTransactionDate())
+                            .description(transaction.getDescription())
+                            .amount(transaction.getAmount())
+                            .tag(transaction.getTag())
+                            .pocket(transaction.getPocket())
+                            .transactionType(StringUtil.setTransactionType(transaction.getTransactionType()))
+                            .build()
+                    ).toList();
+
             response = ResTransactionDailyDTO.builder()
                     .userId(userId)
                     .size(Long.valueOf(dailyTransactions.getSize()))
                     .page(Long.valueOf(dailyTransactions.getTotalPages()))
-                    .transactions(dailyTransactions.getContent())
+                    .transactions(transactionList)
                     .build();
 
             message = "daily transactions get successfully";
@@ -111,6 +129,44 @@ public class TransactionService {
         }
 
         return ApiResponse.<ResTransactionDailyDTO>builder()
+                .data(response)
+                .message(message)
+                .build();
+    }
+
+
+    @Transactional
+    public ApiResponse<ResCreateTransactionDTO> createTransaction(ReqCreateTransactionDTO request) {
+        String message = "";
+        Transaction data = new Transaction();
+        ResCreateTransactionDTO response = new ResCreateTransactionDTO();
+
+        try {
+            data.setUserProfileId(request.getUserId());
+//            data.setSplitBillId();
+            data.setTransactionType(request.getTransactionType());
+            data.setPocketId(request.getPocketId());
+//            data.setImage();
+            data.setDescription(request.getDescription());
+            data.setTag(request.getTag());
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate transactionDate = LocalDate.parse(request.getDate(), formatter);
+            data.setTransDate(transactionDate);
+            data.setAmount(request.getAmount());
+            data.setStatus(2); // 0 > unpaid || 1 > pending || 2 > paid
+            data.setCreatedAt(DateTimeUtil.generateDateTimeIndonesia());
+
+            Transaction transaction = transactionRepository.saveAndFlush(data);
+
+            message = "daily transactions get successfully";
+
+        }catch (Exception e) {
+            response = null;
+            log.error("Error : {}" + e.getMessage(), e);
+        }
+
+        return ApiResponse.<ResCreateTransactionDTO>builder()
                 .data(response)
                 .message(message)
                 .build();
