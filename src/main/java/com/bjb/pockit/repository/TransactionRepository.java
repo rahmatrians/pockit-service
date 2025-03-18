@@ -41,8 +41,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             " FROM transaction trx " +
             " JOIN pocket pkt ON trx.pocket_id = pkt.id" +
             " WHERE trx.deleted_date IS NULL AND trx.user_profile_id = :userProfileId " +
-            " AND EXTRACT(MONTH FROM trx.created_at) = :month " +
-            " AND EXTRACT(YEAR FROM trx.created_at) = :year "
+            " AND EXTRACT(MONTH FROM trx.trans_date) = :month " +
+            " AND EXTRACT(YEAR FROM trx.trans_date) = :year "
             , nativeQuery = true)
     Page<TransactionDaily> findTransactionDailyByUserId(
             @Param("userProfileId") Long userProfileId,
