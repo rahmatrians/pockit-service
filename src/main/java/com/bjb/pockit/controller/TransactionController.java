@@ -84,4 +84,19 @@ public class TransactionController {
                     .body(ApiResponse.error(response.getMessage()));
         }
     }
+
+    @DeleteMapping("/transaction/delete/{id}")
+    public ResponseEntity<ApiResponse<String>> deleteTransaction(@PathVariable("id") Long id) {
+        ApiResponse<String> response = transactionService.deleteTransaction(id);
+
+        if (response.getData() != null) {
+            return ResponseEntity
+                    .status(ResponseStatus.OK.getStatus())
+                    .body(ApiResponse.success(response.getData(), response.getMessage()));
+        } else {
+            return ResponseEntity
+                    .status(ResponseStatus.NOT_FOUND.getStatus())
+                    .body(ApiResponse.error(response.getMessage()));
+        }
+    }
 }

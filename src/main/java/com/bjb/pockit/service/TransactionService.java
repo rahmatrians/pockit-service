@@ -305,4 +305,73 @@ public class TransactionService {
                 .build();
     }
 
+    @Transactional
+    public ApiResponse<String> deleteTransaction(Long id) {
+        String message = "";
+        String result = null;
+
+        try {
+            // Find the transaction to delete
+            Optional<Transaction> transactionOpt = transactionRepository.findById(id);
+
+            if (transactionOpt.isEmpty()) {
+                return ApiResponse.<String>builder()
+                        .data(null)
+                        .message("Transaction not found with ID: " + id)
+                        .build();
+            }
+
+            Transaction transaction = transactionOpt.get();
+
+            // Get transaction details needed for pocket balance adjustment
+            Double amount = transaction.getAmount();
+            Long transType = transaction.getTransactionType();
+            Long pocketId = transaction.getPocketId();
+
+            // Get the associated pocket
+            Optional<Pocket> pocketOpt = pocketRepository.findById(pocketId);
+
+            if (pocketOpt.isEmpty()) {
+                return ApiResponse.<String>builder()
+                        .data(null)
+                        .message("Associated pocket not found with ID: " + pocketId)
+                        .build();
+            }
+
+            Pocket pocket = pocketOpt.get();
+            Double balance = pocket.getBalance();
+
+            // Adjust the pocket balance by reversing the transaction effect
+            if (transType.equals(1L) || transType.equals(3L) || transType.equals(5L)) { // expense
+                balance += amount; // Add back the expense amount
+            } else if (transType.equals(2L) || transType.equals(4L)) { // income
+                balance -= amount; // Subtract the income amount
+            }
+
+            // Update the pocket balance
+            pocketRepository.updateBalance(balance, pocketId);
+
+            // Soft delete or hard delete based on your requirements
+            // Option 1: Hard delete
+            transactionRepository.deleteById(id);
+
+            // Option 2: Soft delete (if your entity has a status field)
+            // transaction.setStatus(0); // 0 for deleted/inactive
+            // transaction.setUpdatedAt(DateTimeUtil.generateDateTimeIndonesia());
+            // transactionRepository.save(transaction);
+
+            result = "Transaction with ID: " + id;
+            message = "Transaction deleted successfully";
+
+        } catch (Exception e) {
+            log.error("Error deleting transaction: {}", e.getMessage(), e);
+            message = "Failed to delete transaction: " + e.getMessage();
+        }
+
+        return ApiResponse.<String>builder()
+                .data(result)
+                .message(message)
+                .build();
+    }
+
 }
