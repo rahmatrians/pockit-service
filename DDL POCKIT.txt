@@ -1,0 +1,57 @@
+CREATE TABLE user_profile (
+id SERIAL PRIMARY KEY,
+fullname VARCHAR NOT NULL,
+gender VARCHAR NOT NULL,
+phone_number VARCHAR,
+email VARCHAR NOT NULL,
+password VARCHAR NOT NULL,
+deleted_date TIMESTAMP,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+updated_at TIMESTAMP
+);
+
+CREATE TABLE pocket_type (
+id SERIAL PRIMARY KEY,
+name VARCHAR NOT NULL,
+deleted_date TIMESTAMP,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+updated_at TIMESTAMP
+);
+
+CREATE TABLE pocket (
+id SERIAL PRIMARY KEY,
+pocket_type_id INT REFERENCES pocket_type(id) ON DELETE CASCADE,
+name VARCHAR NOT NULL,
+account_number VARCHAR NOT NULL,
+balance DECIMAL DEFAULT 0.00,
+deleted_date TIMESTAMP,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+updated_at TIMESTAMP
+);
+
+CREATE TABLE split_bill (
+id SERIAL PRIMARY KEY,
+user_profile_id INT REFERENCES user_profile(id) ON DELETE CASCADE,
+title VARCHAR NOT NULL,
+total_amount DECIMAL DEFAULT 0.00,
+image TEXT,
+deleted_date TIMESTAMP,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+updated_at TIMESTAMP
+);
+
+CREATE TABLE transaction (
+id SERIAL PRIMARY KEY,
+user_profile_id INT REFERENCES user_profile(id) ON DELETE CASCADE,
+split_bill_id INT REFERENCES split_bill(id) ON DELETE CASCADE,
+transaction_type INT NOT NULL,
+pocket_id INT REFERENCES pocket(id) ON DELETE CASCADE,
+image TEXT,
+description VARCHAR,
+trans_date DATE NOT NULL,
+amount DECIMAL DEFAULT 0.00,
+status INT NOT NULL,
+deleted_date TIMESTAMP,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+updated_at TIMESTAMP
+);
