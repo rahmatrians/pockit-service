@@ -1,6 +1,7 @@
 package com.bjb.pockit.service;
 
 import com.bjb.pockit.dto.*;
+import com.bjb.pockit.entity.Pocket;
 import com.bjb.pockit.entity.Transaction;
 import com.bjb.pockit.entity.UserProfile;
 import com.bjb.pockit.repository.PocketRepository;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -159,7 +161,28 @@ public class TransactionService {
 
             Transaction transaction = transactionRepository.saveAndFlush(data);
 
-            message = "daily transactions get successfully";
+            Optional<Pocket> pocketTrans = pocketRepository.findById(transaction.getPocketId());
+
+            Double balance = pocketTrans.get().getBalance();
+            if (request.getTransactionType().equals(1) || request.getTransactionType().equals(3)) {
+                balance = pocketTrans.get().getBalance() - request.getAmount();
+            }else {
+                balance = pocketTrans.get().getBalance() + request.getAmount();
+            }
+
+            pocketRepository.updateBalance(balance, request.getPocketId());
+
+            response = ResCreateTransactionDTO.builder()
+                    .userId(request.getUserId())
+                    .pocketId(request.getPocketId())
+                    .transactionType(request.getTransactionType())
+                    .description(request.getDescription())
+                    .tag(request.getDescription())
+                    .amount(request.getAmount())
+                    .date(request.getDate())
+                    .build();
+
+            message = "Transactions created successfully";
 
         }catch (Exception e) {
             response = null;

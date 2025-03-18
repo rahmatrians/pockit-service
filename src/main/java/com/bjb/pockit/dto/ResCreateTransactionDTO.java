@@ -13,7 +13,7 @@ public class ResCreateTransactionDTO {
 
     private Long userId;
     private String date;
-    private String transactionType;
+    private Long transactionType;
     private Double amount;
     private String tag;
     private Long pocketId;
