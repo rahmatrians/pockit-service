@@ -303,13 +303,14 @@ public class TransactionService {
                 .build();
     }
 
+
     @Transactional
     public ApiResponse<String> deleteTransaction(Long id) {
         String message = "";
         String result = null;
 
         try {
-            // Find the transaction to delete
+            // Find the transaction to soft delete
             Optional<Transaction> transactionOpt = transactionRepository.findById(id);
 
             if (transactionOpt.isEmpty()) {
@@ -349,21 +350,16 @@ public class TransactionService {
             // Update the pocket balance
             pocketRepository.updateBalance(balance, pocketId);
 
-            // Soft delete or hard delete based on your requirements
-            // Option 1: Hard delete
-            transactionRepository.deleteById(id);
-
-            // Option 2: Soft delete (if your entity has a status field)
-            // transaction.setStatus(0); // 0 for deleted/inactive
-            // transaction.setUpdatedAt(DateTimeUtil.generateDateTimeIndonesia());
-            // transactionRepository.save(transaction);
+            // Soft delete by setting the deleted_date to current date/time
+            transaction.setDeletedDate(DateTimeUtil.generateDateTimeIndonesia());
+            transactionRepository.save(transaction);
 
             result = "Transaction with ID: " + id;
-            message = "Transaction deleted successfully";
+            message = "Transaction soft deleted successfully";
 
         } catch (Exception e) {
-            log.error("Error deleting transaction: {}", e.getMessage(), e);
-            message = "Failed to delete transaction: " + e.getMessage();
+            log.error("Error soft deleting transaction: {}", e.getMessage(), e);
+            message = "Failed to soft delete transaction: " + e.getMessage();
         }
 
         return ApiResponse.<String>builder()
