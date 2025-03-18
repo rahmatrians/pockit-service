@@ -5,16 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class ResListPocketDTO {
-    private Long userId;
-    private Long page;
-    private Long size;
-    private List<ListPocketDTO> pockets;
+public class ListPocketDTO {
+    private Long id;
+    private String name;
+    private String account_number;
+    private Double balance;
 }

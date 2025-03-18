@@ -30,8 +30,6 @@ public class TransactionService {
     @Autowired
     private PocketRepository pocketRepository;
 
-
-
     @Transactional
     public ApiResponse<ResSummaryBalanceDTO> getSummaryBalance(Long userId, String date) {
         String message = "";
