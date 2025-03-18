@@ -2,6 +2,7 @@ package com.bjb.pockit.controller;
 
 import com.bjb.pockit.constant.ResponseStatus;
 import com.bjb.pockit.dto.*;
+import com.bjb.pockit.service.PocketService;
 import com.bjb.pockit.service.TransactionService;
 import com.bjb.pockit.service.UserProfileService;
 import org.apache.commons.lang3.ObjectUtils;
@@ -16,7 +17,8 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-
+    @Autowired
+    private PocketService pocketService;
 
     @GetMapping("/balance")
     public ResponseEntity<ApiResponse<ResSummaryBalanceDTO>> getBalance(@RequestParam("userId") Long userId, @RequestParam("date") String date) {
@@ -54,6 +56,22 @@ public class TransactionController {
     public ResponseEntity<ApiResponse<ResCreateTransactionDTO>> createTransaction(@RequestBody ReqCreateTransactionDTO request) {
 
         ApiResponse<ResCreateTransactionDTO> response = transactionService.createTransaction(request);
+
+        if (ObjectUtils.isNotEmpty(response.getData())) {
+            return ResponseEntity
+                    .status(ResponseStatus.OK.getStatus())
+                    .body(ApiResponse.success(response.getData(), response.getMessage()));
+        } else {
+            return ResponseEntity
+                    .status(ResponseStatus.NOT_FOUND.getStatus())
+                    .body(ApiResponse.error(response.getMessage()));
+        }
+    }
+
+    @GetMapping("/pocket")
+    public ResponseEntity<ApiResponse<ResListPocketDTO>> getListPocket(@RequestParam("userId") Long userId, @RequestParam("page") Long page,  @RequestParam("size") Long size) {
+
+        ApiResponse<ResListPocketDTO> response = pocketService.getListPocket(userId, page, size);
 
         if (ObjectUtils.isNotEmpty(response.getData())) {
             return ResponseEntity
