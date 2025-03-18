@@ -2,7 +2,6 @@ package com.bjb.pockit.service;
 
 import com.bjb.pockit.dto.ApiResponse;
 import com.bjb.pockit.dto.ResPocketTypeDTO;
-import com.bjb.pockit.dto.ResRegisterDTO;
 import com.bjb.pockit.entity.PocketType;
 import com.bjb.pockit.repository.PocketTypeRepository;
 import jakarta.transaction.Transactional;
@@ -52,5 +51,4 @@ public class PocketService {
                 .message(errMessage)
                 .build();
     }
-
 }
