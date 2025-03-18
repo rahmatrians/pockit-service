@@ -33,8 +33,6 @@ public class UserProfileService {
     @Autowired
     private UserProfileRepository userProfileRepository;
 
-
-
     @Transactional
     public ApiResponse<ResRegisterDTO> registerUser(ReqRegisterDTO request) {
         String errMessage = "";
