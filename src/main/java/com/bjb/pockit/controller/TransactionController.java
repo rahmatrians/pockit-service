@@ -117,4 +117,40 @@ public class TransactionController {
                     .body(ApiResponse.error(response.getMessage()));
         }
     }
+
+    @PostMapping("/pocket/create")
+    public ResponseEntity<ApiResponse<ResPocketDTO>> createTransaction(@RequestBody ReqPocketDTO request) {
+
+        ApiResponse<ResPocketDTO> response = pocketService.createPocket(request);
+
+        if (ObjectUtils.isNotEmpty(response.getData())) {
+            return ResponseEntity
+                    .status(ResponseStatus.OK.getStatus())
+                    .body(ApiResponse.success(response.getData(), response.getMessage()));
+        } else {
+            return ResponseEntity
+                    .status(ResponseStatus.NOT_FOUND.getStatus())
+                    .body(ApiResponse.error(response.getMessage()));
+        }
+    }
+
+    @PutMapping("/pocket/update/{id}")
+    public ResponseEntity<ApiResponse<ResPocketDTO>> updatePocket(
+            @PathVariable("id") Long id,
+            @RequestBody ReqPocketDTO request) {
+
+
+        ApiResponse<ResPocketDTO> response = pocketService.updatePocket(id, request);
+
+        if (ObjectUtils.isNotEmpty(response.getData())) {
+            return ResponseEntity
+                    .status(ResponseStatus.OK.getStatus())
+                    .body(ApiResponse.success(response.getData(), response.getMessage()));
+        } else {
+            return ResponseEntity
+                    .status(ResponseStatus.NOT_FOUND.getStatus())
+                    .body(ApiResponse.error(response.getMessage()));
+        }
+    }
+
 }

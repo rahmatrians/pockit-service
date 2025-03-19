@@ -3,8 +3,10 @@ package com.bjb.pockit.service;
 import com.bjb.pockit.dto.*;
 import com.bjb.pockit.entity.Pocket;
 import com.bjb.pockit.entity.PocketType;
+import com.bjb.pockit.entity.Transaction;
 import com.bjb.pockit.repository.PocketRepository;
 import com.bjb.pockit.repository.PocketTypeRepository;
+import com.bjb.pockit.util.DateTimeUtil;
 import com.bjb.pockit.util.StringUtil;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -109,4 +113,90 @@ public class PocketService {
                 .message(message)
                 .build();
     }
+
+    @Transactional
+    public ApiResponse<ResPocketDTO> createPocket(ReqPocketDTO request) {
+        String message = "";
+        Pocket data = new Pocket();
+        ResPocketDTO response = new ResPocketDTO();
+
+        try {
+            data.setUserProfileId(request.getUserId());
+            data.setName(request.getName());
+            data.setAccountNumber(request.getAccountNumber());
+            data.setBalance(request.getBalance());
+            data.setPocketTypeId(request.getPocketTypeId());
+            data.setCreatedAt(DateTimeUtil.generateDateTimeIndonesia());
+
+            pocketRepository.saveAndFlush(data);
+
+            response = ResPocketDTO.builder()
+                    .userId(request.getUserId())
+                    .name(request.getName())
+                    .accountNumber(request.getAccountNumber())
+                    .balance(request.getBalance())
+                    .pocketTypeId(request.getPocketTypeId())
+                    .build();
+
+            message = "Pocket created successfully";
+
+        }catch (Exception e) {
+            response = null;
+            log.error("Error : {}" + e.getMessage(), e);
+        }
+
+        return ApiResponse.<ResPocketDTO>builder()
+                .data(response)
+                .message(message)
+                .build();
+    }
+
+
+    @Transactional
+    public ApiResponse<ResPocketDTO> updatePocket(Long id, ReqPocketDTO request) {
+        String message = "";
+        ResPocketDTO response = null;
+
+        try {
+            // Find the existing transaction
+            Optional<Pocket> pocket = pocketRepository.findById(id);
+
+            if (pocket.isEmpty()) {
+                return ApiResponse.<ResPocketDTO>builder()
+                        .data(null)
+                        .message("Pocket not found")
+                        .build();
+            }
+
+            pocket.get().setName(request.getName());
+            pocket.get().setAccountNumber(request.getAccountNumber());
+            pocket.get().setPocketTypeId(request.getPocketTypeId());
+            pocket.get().setBalance(request.getBalance());
+            pocket.get().setUpdatedAt(DateTimeUtil.generateDateTimeIndonesia());
+
+
+            pocketRepository.save(pocket.get());
+
+            // Build the response
+            response = ResPocketDTO.builder()
+                    .name(request.getName())
+                    .accountNumber(request.getAccountNumber())
+                    .balance(request.getBalance())
+                    .pocketTypeId(request.getPocketTypeId())
+                    .userId(request.getUserId())
+                    .build();
+
+            message = "Pocket updated successfully";
+
+        } catch (Exception e) {
+            // Log the error and return null data
+            log.error("Error updating pocket: {}", e.getMessage(), e);
+        }
+
+        return ApiResponse.<ResPocketDTO>builder()
+                .data(response)
+                .message(message)
+                .build();
+    }
+
 }
